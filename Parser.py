@@ -11,7 +11,8 @@ class Lexer:
     def advance(self):
         # TODO: Students need to complete the logic to advance the position.
         self.position += 1
-        self.current_char = self.code[self.position]
+        if self.position < len(self.code):
+            self.current_char = self.code[self.position]
 
     # Skip whitespaces.
     def skip_whitespace(self):
@@ -24,7 +25,10 @@ class Lexer:
         result = ''
         # TODO: Complete logic for handling identifiers.
         while self.current_char is not " ":
-            result += self.current_char
+            if (self.current_char.isalpha() or self.current_char == "_") and result == '':
+                result += self.current_char
+            if self.current_char.isalpha() or self.current_char == "_" or self.current_char.isdigit():
+                result += self.current_char
             self.advance()
         return ('IDENTIFIER', result)
 
@@ -57,30 +61,37 @@ class Lexer:
                 return self.number()
 
             # TODO: Add logic for operators and punctuation tokens.
-            if self.current_char == "+":
-                pass
-            if self.current_char == "-":
-                pass
-            if self.current_char in "*":
-                pass
-            if self.current_char in "/":
-                pass
-            if self.current_char in "=":
-                pass
-            if self.current_char in "!=":
-                pass
-            if self.current_char in "==":
-                pass
-            if self.current_char in "<":
-                pass
-            if self.current_char in ">":
-                pass
-            if self.current_char in "(":
-                pass
-            if self.current_char in ")":
-                pass
-            if self.current_char in ":":
-                pass
+            match self.current_char in "+-*/=!<>():":
+                case "+":
+                    return ("PLUS", "+")
+                case "-":
+                    return ("MINUS", "-")
+                case "*":
+                    return ("MULTIPLY", "*")
+                case "/":
+                    return ("DIVIDE", "/")
+                case "=":
+                    self.advance()
+                    if self.current_char == "=" and self.position+1 < len(self.code):
+                        return("EQ", "==")
+                    else:
+                        return("EQUALS", "=")
+                case "!":
+                    if self.current_char == "=" and self.position+1 < len(self.code):
+                        return("NEQ", "!=")
+                case "<":
+                    return("LESS","<")
+                case ">":
+                    return("GREATER",">")
+                case "+":
+                    return("PLUS","+")
+                case "(":
+                    return("LPAREN","(")
+                case ")":
+                    return("RPAREN",")")
+                case ":":
+                    return("COLON",":")
+                
 
             raise ValueError(f"Illegal character at position {self.position}: {self.current_char}")
 
@@ -89,6 +100,8 @@ class Lexer:
     # Collect all tokens into a list.
     def tokenize(self):
         # TODO: Implement the logic to collect tokens.
+        while self.current_char:
+            self.tokens.append(self.token())
         return self.tokens
 
 class Parser:
