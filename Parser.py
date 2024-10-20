@@ -13,7 +13,6 @@ class Lexer:
         self.position += 1
         if self.position < len(self.code):
             self.current_char = self.code[self.position]
-            print("In the Loop")
         else:
             self.current_char = None
         
@@ -22,7 +21,6 @@ class Lexer:
     def skip_whitespace(self):
         # TODO: Complete logic to skip whitespaces.
         if self.current_char.isspace():
-            print("skipping whitesapce")
             self.advance()
 
     # Tokenize an identifier.
@@ -30,14 +28,11 @@ class Lexer:
         result = ''
         # TODO: Complete logic for handling identifiers.
         while not self.current_char.isspace():
-            if (self.current_char.isalpha() or self.current_char == "_") and result == '':
+            if (self.current_char.isalpha() or self.current_char == '_') and result == '':
                 result += self.current_char
-                print(result)
-            if self.current_char.isalpha() or self.current_char == "_" or self.current_char.isdigit():
+            elif (self.current_char.isalpha() or self.current_char == '_' or self.current_char.isdigit()):
                 result += self.current_char
-                print(result)
             self.advance()
-            print("Identifier func")
         return ('IDENTIFIER', result)
 
     # Tokenize a number.
@@ -58,11 +53,9 @@ class Lexer:
             #print(str(self.position))
 
             if self.current_char.isspace():
-                print("whitespace")
                 self.skip_whitespace()
                 continue
             if self.current_char.isalpha():
-                print("isalpha")
                 ident = self.identifier()
                 if ident[1] == 'if':
                     return ('IF', 'if')
@@ -75,48 +68,49 @@ class Lexer:
                 return self.number()
 
             # TODO: Add logic for operators and punctuation tokens.
-            match self.current_char in '+-*/=!<>():':
-                case '+':
-                    self.advance()
-                    return ('PLUS', '+')
-                case '-':
-                    self.advance()
-                    return ('MINUS', '-')
-                case '*':
-                    self.advance()
-                    return ('MULTIPLY', '*')
-                case '/':
-                    self.advance()
-                    return ('DIVIDE', '/')
-                case '=':
-                    self.advance()
-                    if self.current_char == '=' and self.position+1 < len(self.code):
-                        return('EQ', '==')
-                    else:
-                        return('EQUALS', '=')
-                case '!':
-                    self.advance()
-                    if self.current_char == '=' and self.position+1 < len(self.code):
-                        return('NEQ', '!=')
-                case '<':
-                    self.advance()
-                    return('LESS','<')
-                case '>':
-                    self.advance()
-                    return('GREATER','>')
-                case '+':
-                    self.advance()
-                    return('PLUS','+')
-                case '(':
-                    self.advance()
-                    return('LPAREN','(')
-                case ')':
-                    self.advance()
-                    return('RPAREN',')')
-                case ':':
-                    self.advance()
-                    return('COLON',':')
-                
+            if self.current_char in '+-*/=!<>():':
+                match self.current_char:
+                    case '+':
+                        self.advance()
+                        return ('PLUS', '+')
+                    case '-':
+                        self.advance()
+                        return ('MINUS', '-')
+                    case '*':
+                        self.advance()
+                        return ('MULTIPLY', '*')
+                    case '/':
+                        self.advance()
+                        return ('DIVIDE', '/')
+                    case '=':
+                        self.advance()
+                        if self.current_char == '=' and self.position < len(self.code):
+                            self.advance()
+                            return('EQ', '==')
+                        else:
+                            return('EQUALS', '=')
+                    case '!':
+                        self.advance()
+                        if self.current_char == '=' and self.position < len(self.code):
+                            return('NEQ', '!=')
+                    case '<':
+                        self.advance()
+                        return('LESS','<')
+                    case '>':
+                        self.advance()
+                        return('GREATER','>')
+                    case '+':
+                        self.advance()
+                        return('PLUS','+')
+                    case '(':
+                        self.advance()
+                        return('LPAREN','(')
+                    case ')':
+                        self.advance()
+                        return('RPAREN',')')
+                    case ':':
+                        self.advance()
+                        return('COLON',':')
             raise ValueError(f"Illegal character at position {self.position}: {self.current_char}")
 
         return ('EOF', None)
@@ -158,8 +152,11 @@ class Parser:
         while self.current_token[0] != 'EOF':
             # TODO: Parse each statement and append it to the list.
             stmt = self.statement()
+            self.advance()
+            print(f"stmt is : {stmt}")
             statements.append(stmt)
-            statements.append(self.tokens[self.current_token[0]])
+            print(f"statements is: {statements}")
+            #statements.append(self.tokens[self.current_token[0]])
         # TODO: Return an AST node that represents the program.
         return statements
 
@@ -174,15 +171,15 @@ class Parser:
         """
         if self.current_token[0] == 'IDENTIFIER':
             if self.peek() == 'EQUALS':  # Assignment
-                return AST.Assignment(self.current_token[0],self.current_token[1])#AST of assign_stmt
+                return self.assign_stmt()
             elif self.peek() == 'LPAREN':  # Function call
-                return AST.FunctionCall(self.current_token[0],self.current_token[1])#AST of function call
+                return self.function_call()
             else:
                 raise ValueError(f"Unexpected token after identifier: {self.current_token[0],self.current_token[1]}")
         elif self.current_token[0] == 'IF':
-            return AST.IfStatement(self.current_token[0],self.current_token[1])#AST of if stmt
+            return self.if_stmt()
         elif self.current_token[0] == 'WHILE':
-            return AST.WhileStatement(self.current_token[0],self.current_token[1])#AST of while stmt
+            return self.while_stmt
         else:
             # TODO: Handle additional statements if necessary.
             raise ValueError(f"Unexpected token: {self.current_token}")
@@ -194,7 +191,7 @@ class Parser:
         x = 5 + 3
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
-        identifier = self.current_token[1]
+        identifier = self.current_token
         self.advance()
         self.expect('EQUALS')
         expression = self.expression()
@@ -278,10 +275,10 @@ class Parser:
         """
         # write your code here, for reference check expression function
         left = self.factor()
-        while self.current_token[0] in ['MULTIPLY', 'DIVIDE']:
+        while self.current_token[0] in ['EQ', 'NEQ', 'GREATER', 'LESS']:
             op = self.current_token
             self.advance()
-            right = self.factor()
+            right = self.term()
             left = AST.BinaryOperation(left, op, right)
         return 
 
@@ -293,6 +290,12 @@ class Parser:
         TODO: Implement the parsing for multiplication and division.
         """
         # write your code here, for reference check expression function
+        left = self.factor()
+        while self.current_token[0] in ['MULTIPLY', 'DIVIDE']:
+            op = self.current_token
+            self.advance()
+            right = self.term()
+            left = AST.BinaryOperation(left, op, right)
         return 
 
     def factor(self):
@@ -310,10 +313,14 @@ class Parser:
             return val
         elif self.current_token[0] == 'IDENTIFIER':
             #write your code here
+            val = self.current_token
             self.expression()
+            return val
         elif self.current_token[0] == 'LPAREN':
             #write your code here
+            val = self.current_token
             self.expression()
+            return val
         else:
             raise ValueError(f"Unexpected token in factor: {self.current_token}")
 
