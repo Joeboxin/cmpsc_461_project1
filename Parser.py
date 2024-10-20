@@ -114,6 +114,8 @@ class Parser:
         # TODO: Ensure the parser doesn't run out of tokens.
         if len(self.tokens) > 1:
             self.current_token = self.tokens.pop(0)
+        else:
+            self.current_token = ('EOF', None)
 
     def parse(self):
         """
@@ -130,6 +132,8 @@ class Parser:
         statements = []
         while self.current_token[0] != 'EOF':
             # TODO: Parse each statement and append it to the list.
+            stmt = self.statement()
+            statements.append(stmt)
             statements.append(self.tokens[self.current_token[0]])
         # TODO: Return an AST node that represents the program.
         return statements
@@ -145,15 +149,15 @@ class Parser:
         """
         if self.current_token[0] == 'IDENTIFIER':
             if self.peek() == 'EQUALS':  # Assignment
-                return #AST of assign_stmt
+                return AST.Assignment(self.current_token[0],self.current_token[1])#AST of assign_stmt
             elif self.peek() == 'LPAREN':  # Function call
-                return #AST of function call
+                return AST.FunctionCall(self.current_token[0],self.current_token[1])#AST of function call
             else:
-                raise ValueError(f"Unexpected token after identifier: {self.current_token}")
+                raise ValueError(f"Unexpected token after identifier: {self.current_token[0],self.current_token[1]}")
         elif self.current_token[0] == 'IF':
-            return #AST of if stmt
+            return AST.IfStatement(self.current_token[0],self.current_token[1])#AST of if stmt
         elif self.current_token[0] == 'WHILE':
-            return #AST of while stmt
+            return AST.WhileStatement(self.current_token[0],self.current_token[1])#AST of while stmt
         else:
             # TODO: Handle additional statements if necessary.
             raise ValueError(f"Unexpected token: {self.current_token}")
@@ -165,7 +169,10 @@ class Parser:
         x = 5 + 3
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
-        
+        identifier = self.current_token[1]
+        self.advance()
+        self.expect('EQUALS')
+        expression = self.expression()
     
         return AST.Assignment(identifier, expression)
 
@@ -179,6 +186,17 @@ class Parser:
             # statements
         TODO: Implement the logic to parse the if condition and blocks of code.
         """
+        self.expect('IF')
+        condition = self.boolean_expression()  # Parse the condition
+        self.expect('COLON') 
+        block = self.block() 
+        else_block = None
+        if self.current_token[0] == 'ELSE':
+            self.advance()
+            self.expect('COLON')
+            else_block = self.block()
+        return AST.IfStatement(condition, block, else_block)
+
 
     def while_stmt(self):
         """
@@ -188,7 +206,10 @@ class Parser:
             # statements
         TODO: Implement the logic to parse while loops with a condition and a block of statements.
         """
-
+        self.expect('WHILE')
+        condition = self.boolean_expression()
+        self.expect('COLON')
+        block = self.block()
         return AST.WhileStatement(condition, block)
 
     def block(self):
@@ -203,6 +224,8 @@ class Parser:
         """
         statements = []
         # write your code here
+        while self.current_token[0] != 'EOF' and self.current_token != 'DEDENT':
+            stmt = self.statement()
         return AST.Block(statements)
 
     def expression(self):
@@ -229,6 +252,12 @@ class Parser:
         TODO: Implement parsing for boolean expressions.
         """
         # write your code here, for reference check expression function
+        left = self.factor()
+        while self.current_token[0] in ['MULTIPLY', 'DIVIDE']:
+            op = self.current_token
+            self.advance()
+            right = self.factor()
+            left = AST.BinaryOperation(left, op, right)
         return 
 
     def term(self):
@@ -252,10 +281,14 @@ class Parser:
         """
         if self.current_token[0] == 'NUMBER':
             #write your code here
+            val = self.current_token
+            return val
         elif self.current_token[0] == 'IDENTIFIER':
             #write your code here
+            self.expression()
         elif self.current_token[0] == 'LPAREN':
             #write your code here
+            self.expression()
         else:
             raise ValueError(f"Unexpected token in factor: {self.current_token}")
 
@@ -266,7 +299,10 @@ class Parser:
         myFunction(arg1, arg2)
         TODO: Implement parsing for function calls with arguments.
         """
-        
+        func_name = self.current_token[1]
+        self.advance()
+        self.expect("LPAREN")
+        args = self.arg_list()
         return AST.FunctionCall(func_name, args)
 
     def arg_list(self):
@@ -277,6 +313,11 @@ class Parser:
         TODO: Implement the logic to parse comma-separated arguments.
         """
         args = []
+        if self.current_token == "RPAREN":
+            args.append(self.expression())
+            while self.current_token[0] == "COMMA":
+                self.advance()
+                args.append(self.expression)
         return args
 
     def expect(self, token_type):
