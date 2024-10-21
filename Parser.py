@@ -20,7 +20,7 @@ class Lexer:
     # Skip whitespaces.
     def skip_whitespace(self):
         # TODO: Complete logic to skip whitespaces.
-        if self.current_char.isspace():
+        while self.current_char is not None and self.current_char.isspace():
             self.advance()
 
     # Tokenize an identifier.
@@ -120,7 +120,6 @@ class Lexer:
         # TODO: Implement the logic to collect tokens.
         while self.current_char:
             self.tokens.append(self.token())
-            print(self.tokens)
         return self.tokens
 
 class Parser:
@@ -153,10 +152,8 @@ class Parser:
             # TODO: Parse each statement and append it to the list.
             stmt = self.statement()
             self.advance()
-            print(f"stmt is : {stmt}")
             statements.append(stmt)
             print(f"statements is: {statements}")
-            #statements.append(self.tokens[self.current_token[0]])
         # TODO: Return an AST node that represents the program.
         return statements
 
@@ -169,6 +166,8 @@ class Parser:
         
         TODO: Dispatch to the correct parsing function based on the current token.
         """
+        print(f"current_token type: {self.current_token[0]}")
+        print(f"SELF.PEEK 1 is: {self.peek()}")
         if self.current_token[0] == 'IDENTIFIER':
             if self.peek() == 'EQUALS':  # Assignment
                 return self.assign_stmt()
@@ -194,8 +193,9 @@ class Parser:
         identifier = self.current_token
         self.advance()
         self.expect('EQUALS')
+        self.advance()
         expression = self.expression()
-    
+        print(f"Expression in assign_stmt is: {expression}")
         return AST.Assignment(identifier, expression)
 
     def if_stmt(self):
@@ -248,6 +248,8 @@ class Parser:
         # write your code here
         while self.current_token[0] != 'EOF' and self.current_token != 'DEDENT':
             stmt = self.statement()
+            statements.append(stmt)
+            self.advance()
         return AST.Block(statements)
 
     def expression(self):
@@ -263,7 +265,6 @@ class Parser:
             self.advance()  # Skip the operator
             right = self.term()  # Parse the next term
             left = AST.BinaryOperation(left, op, right)
-    
         return left
 
     def boolean_expression(self):
@@ -274,13 +275,13 @@ class Parser:
         TODO: Implement parsing for boolean expressions.
         """
         # write your code here, for reference check expression function
-        left = self.factor()
+        left = self.term()
         while self.current_token[0] in ['EQ', 'NEQ', 'GREATER', 'LESS']:
             op = self.current_token
             self.advance()
             right = self.term()
             left = AST.BinaryOperation(left, op, right)
-        return 
+        return left
 
     def term(self):
         """
@@ -294,9 +295,9 @@ class Parser:
         while self.current_token[0] in ['MULTIPLY', 'DIVIDE']:
             op = self.current_token
             self.advance()
-            right = self.term()
+            right = self.factor()
             left = AST.BinaryOperation(left, op, right)
-        return 
+        return left
 
     def factor(self):
         """
@@ -310,16 +311,17 @@ class Parser:
         if self.current_token[0] == 'NUMBER':
             #write your code here
             val = self.current_token
+            self.advance()
             return val
         elif self.current_token[0] == 'IDENTIFIER':
             #write your code here
             val = self.current_token
-            self.expression()
+            self.advance()
             return val
         elif self.current_token[0] == 'LPAREN':
             #write your code here
-            val = self.current_token
-            self.expression()
+            val = self.expression()
+            self.advance()
             return val
         else:
             raise ValueError(f"Unexpected token in factor: {self.current_token}")
@@ -349,7 +351,7 @@ class Parser:
             args.append(self.expression())
             while self.current_token[0] == "COMMA":
                 self.advance()
-                args.append(self.expression)
+                args.append(self.expression())
         return args
 
     def expect(self, token_type):
