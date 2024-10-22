@@ -27,7 +27,7 @@ class Lexer:
     def identifier(self):
         result = ''
         # TODO: Complete logic for handling identifiers.
-        while not self.current_char.isspace():
+        while self.current_char.isalpha():
             if (self.current_char.isalpha() or self.current_char == '_') and result == '':
                 result += self.current_char
             elif (self.current_char.isalpha() or self.current_char == '_' or self.current_char.isdigit()):
@@ -47,11 +47,7 @@ class Lexer:
         return ('NUMBER', num)
 
     def token(self):
-        
         while self.current_char is not None:
-            #print("TOken")
-            #print(str(self.position))
-
             if self.current_char.isspace():
                 self.skip_whitespace()
                 continue
@@ -68,8 +64,9 @@ class Lexer:
                 return self.number()
 
             # TODO: Add logic for operators and punctuation tokens.
-            if self.current_char in '+-*/=!<>():':
+            if self.current_char in "+-*/=!<>():":
                 match self.current_char:
+
                     case '+':
                         self.advance()
                         return ('PLUS', '+')
@@ -92,6 +89,7 @@ class Lexer:
                     case '!':
                         self.advance()
                         if self.current_char == '=' and self.position < len(self.code):
+                            self.advance()
                             return('NEQ', '!=')
                     case '<':
                         self.advance()
@@ -112,7 +110,6 @@ class Lexer:
                         self.advance()
                         return('COLON',':')
             raise ValueError(f"Illegal character at position {self.position}: {self.current_char}")
-
         return ('EOF', None)
 
     # Collect all tokens into a list.
@@ -130,7 +127,7 @@ class Parser:
     def advance(self):
         # Move to the next token in the list.
         # TODO: Ensure the parser doesn't run out of tokens.
-        if len(self.tokens) > 1:
+        if len(self.tokens) > 0:
             self.current_token = self.tokens.pop(0)
         else:
             self.current_token = ('EOF', None)
@@ -153,7 +150,7 @@ class Parser:
             stmt = self.statement()
             self.advance()
             statements.append(stmt)
-            print(f"statements is: {statements}")
+            print(f"statements is :{statements}") 
         # TODO: Return an AST node that represents the program.
         return statements
 
@@ -166,8 +163,8 @@ class Parser:
         
         TODO: Dispatch to the correct parsing function based on the current token.
         """
-        print(f"current_token type: {self.current_token[0]}")
-        print(f"SELF.PEEK 1 is: {self.peek()}")
+        print(f"current token {self.current_token}")
+        print(f"self peek is: {self.peek()}")
         if self.current_token[0] == 'IDENTIFIER':
             if self.peek() == 'EQUALS':  # Assignment
                 return self.assign_stmt()
@@ -178,9 +175,10 @@ class Parser:
         elif self.current_token[0] == 'IF':
             return self.if_stmt()
         elif self.current_token[0] == 'WHILE':
-            return self.while_stmt
+            return self.while_stmt()
         else:
             # TODO: Handle additional statements if necessary.
+            #print(f"this is tokens in statement {self.tokens}")
             raise ValueError(f"Unexpected token: {self.current_token}")
 
     def assign_stmt(self):
@@ -191,11 +189,13 @@ class Parser:
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
         identifier = self.current_token
+        print(f"token before advance:{self.current_token}")
         self.advance()
+        print(f"token after advance:{self.current_token}")
         self.expect('EQUALS')
-        self.advance()
+        print(f"token after expects:{self.current_token}")
         expression = self.expression()
-        print(f"Expression in assign_stmt is: {expression}")
+        print(f"expression is :{expression}")
         return AST.Assignment(identifier, expression)
 
     def if_stmt(self):
@@ -323,6 +323,7 @@ class Parser:
             val = self.expression()
             self.advance()
             return val
+        # TODO: Check for RPAREN, when it is closed
         else:
             raise ValueError(f"Unexpected token in factor: {self.current_token}")
 
