@@ -311,17 +311,17 @@ class Parser:
         if self.current_token[0] == 'NUMBER':
             #write your code here
             val = self.current_token
-            self.advance()
+            #self.advance()
             return val
         elif self.current_token[0] == 'IDENTIFIER':
             #write your code here
             val = self.current_token
-            self.advance()
+            #self.advance()
             return val
         elif self.current_token[0] == 'LPAREN':
             #write your code here
             val = self.expression()
-            self.advance()
+            #self.advance()
             return val
         # TODO: Check for RPAREN, when it is closed
         else:
@@ -338,6 +338,8 @@ class Parser:
         self.advance()
         self.expect("LPAREN")
         args = self.arg_list()
+        self.expect("RPAREN")
+
         return AST.FunctionCall(func_name, args)
 
     def arg_list(self):
@@ -348,7 +350,7 @@ class Parser:
         TODO: Implement the logic to parse comma-separated arguments.
         """
         args = []
-        if self.current_token == "RPAREN":
+        if self.current_token != "RPAREN":
             args.append(self.expression())
             while self.current_token[0] == "COMMA":
                 self.advance()
