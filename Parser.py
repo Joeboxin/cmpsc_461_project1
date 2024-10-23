@@ -180,7 +180,8 @@ class Parser:
             return self.while_stmt()
         else:
             # TODO: Handle additional statements if necessary.
-            if self.current_token[0] == 'PLUS' or self.current_token[0] == 'MINUS':
+            if self.current_token[0] == 'EQUALS':
+                self.advance()
                 return self.expression()
             raise ValueError(f"Unexpected token: {self.current_token}")
 
@@ -191,11 +192,11 @@ class Parser:
         x = 5 + 3
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
-        identifier = self.current_token
+        identifier = self.current_token[1]
         self.advance()
         self.expect('EQUALS')
         expression = self.expression()
-        print(f"expression is :{expression}")
+        print(f"expression is : {expression}")
         return AST.Assignment(identifier, expression)
 
     def if_stmt(self):
@@ -310,19 +311,21 @@ class Parser:
         """
         if self.current_token[0] == 'NUMBER':
             #write your code here
-            val = self.current_token
-            #self.advance()
+            val = self.current_token[1]
+            self.advance()
             return val
         elif self.current_token[0] == 'IDENTIFIER':
             #write your code here
-            val = self.current_token
-            #self.advance()
+            val = self.current_token[1]
+            self.advance()
             return val
         elif self.current_token[0] == 'LPAREN':
             #write your code here
-            val = self.expression()
+            self.advance()
+            expr = self.expression()
+            self.expect('RPAREN')
             #self.advance()
-            return val
+            return expr
         # TODO: Check for RPAREN, when it is closed
         else:
             raise ValueError(f"Unexpected token in factor: {self.current_token}")
