@@ -27,7 +27,7 @@ class Lexer:
     def identifier(self):
         result = ''
         # TODO: Complete logic for handling identifiers.
-        while self.current_char.isalpha():
+        while self.current_char.isalpha() or self.current_char.isdigit() or self.current_char == '_':
             if (self.current_char.isalpha() or self.current_char == '_') and result == '':
                 result += self.current_char
             elif (self.current_char.isalpha() or self.current_char == '_' or self.current_char.isdigit()):
@@ -51,7 +51,7 @@ class Lexer:
             if self.current_char.isspace():
                 self.skip_whitespace()
                 continue
-            if self.current_char.isalpha():
+            if self.current_char.isalpha() or self.current_char == '_':
                 ident = self.identifier()
                 if ident[1] == 'if':
                     return ('IF', 'if')
@@ -117,6 +117,7 @@ class Lexer:
         # TODO: Implement the logic to collect tokens.
         while self.current_char:
             self.tokens.append(self.token())
+            print(self.tokens)
         return self.tokens
 
 class Parser:
@@ -166,6 +167,7 @@ class Parser:
         print(f"current token {self.current_token}")
         print(f"self peek is: {self.peek()}")
         if self.current_token[0] == 'IDENTIFIER':
+            #TODO: Need to look into how to check if the identifier is apart of an expression or defining
             if self.peek() == 'EQUALS':  # Assignment
                 return self.assign_stmt()
             elif self.peek() == 'LPAREN':  # Function call
@@ -178,7 +180,8 @@ class Parser:
             return self.while_stmt()
         else:
             # TODO: Handle additional statements if necessary.
-            #print(f"this is tokens in statement {self.tokens}")
+            if self.current_token[0] == 'PLUS' or self.current_token[0] == 'MINUS':
+                return self.expression()
             raise ValueError(f"Unexpected token: {self.current_token}")
 
     def assign_stmt(self):
@@ -189,11 +192,8 @@ class Parser:
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
         identifier = self.current_token
-        print(f"token before advance:{self.current_token}")
         self.advance()
-        print(f"token after advance:{self.current_token}")
         self.expect('EQUALS')
-        print(f"token after expects:{self.current_token}")
         expression = self.expression()
         print(f"expression is :{expression}")
         return AST.Assignment(identifier, expression)
