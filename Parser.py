@@ -120,7 +120,6 @@ class Lexer:
         # TODO: Implement the logic to collect tokens.
         while self.current_char:
             self.tokens.append(self.token())
-            print(self.tokens)
         return self.tokens
 
 class Parser:
@@ -153,7 +152,6 @@ class Parser:
             # TODO: Parse each statement and append it to the list.
             stmt = self.statement()
             statements.append(stmt)
-            print(f"statements is :{statements}") 
         # TODO: Return an AST node that represents the program.
         return statements
 
@@ -166,8 +164,6 @@ class Parser:
         
         TODO: Dispatch to the correct parsing function based on the current token.
         """
-        print(f"current token {self.current_token}")
-        print(f"self peek is: {self.peek()}")
         if self.current_token[0] == 'IDENTIFIER':
             #TODO: Need to look into how to check if the identifier is apart of an expression or defining
             if self.peek() == 'EQUALS':  # Assignment
@@ -176,12 +172,14 @@ class Parser:
                 return self.function_call()
             else:
                 raise ValueError(f"Unexpected token after identifier: {self.current_token[0],self.current_token[1]}")
-        elif self.current_token[0] == 'IF':
+        elif self.current_token[0] == 'IF' or self.current_token[0] == 'ELSE':
             return self.if_stmt()
         elif self.current_token[0] == 'WHILE':
             return self.while_stmt()
         else:
             # TODO: Handle additional statements if necessary.
+            if self.current_token[0] == 'COLON':
+                return
             raise ValueError(f"Unexpected token: {self.current_token}")
 
     def assign_stmt(self):
@@ -195,7 +193,6 @@ class Parser:
         self.advance()
         self.expect('EQUALS')
         expression = self.expression()
-        print(f"expression in assign_stmt is : {expression}")
         return AST.Assignment(cur_token, expression)
 
     def if_stmt(self):
@@ -208,18 +205,13 @@ class Parser:
             # statements
         TODO: Implement the logic to parse the if condition and blocks of code.
         """
-        print(f"if_stmt_token 1= {self.current_token}")
         self.expect('IF')
-        print(f"if_stmt_token 2= {self.current_token}")
         condition = self.boolean_expression()  # Parse the condition
-        print(f"if_stmt_token 3= {self.current_token}")
         self.expect('COLON')
-        print(f"if_stmt_token 4= {self.current_token}")
         block = self.block() 
         else_block = None
-        print(f"should be else: {self.current_token}")
         if self.current_token[0] == 'ELSE':
-            self.advance()
+            self.expect('ELSE')
             self.expect('COLON')
             else_block = self.block()
         return AST.IfStatement(condition, block, else_block)
@@ -251,9 +243,8 @@ class Parser:
         """
         statements = []
         # write your code here
-        while self.current_token[0] != 'EOF' and self.current_token != 'DEDENT':
+        while self.current_token[0] != 'EOF':
             stmt = self.statement()
-            print(f"block statements are: {stmt}")
             statements.append(stmt)
             self.advance()
         return AST.Block(statements)
