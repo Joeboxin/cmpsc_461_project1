@@ -149,7 +149,6 @@ class Parser:
         while self.current_token[0] != 'EOF':
             # TODO: Parse each statement and append it to the list.
             stmt = self.statement()
-            self.advance()
             statements.append(stmt)
             print(f"statements is :{statements}") 
         # TODO: Return an AST node that represents the program.
@@ -180,9 +179,6 @@ class Parser:
             return self.while_stmt()
         else:
             # TODO: Handle additional statements if necessary.
-            if self.current_token[0] == 'EQUALS':
-                self.advance()
-                return self.expression()
             raise ValueError(f"Unexpected token: {self.current_token}")
 
     def assign_stmt(self):
@@ -192,12 +188,12 @@ class Parser:
         x = 5 + 3
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
-        identifier = self.current_token[1]
+        cur_token = self.current_token
         self.advance()
         self.expect('EQUALS')
         expression = self.expression()
-        print(f"expression is : {expression}")
-        return AST.Assignment(identifier, expression)
+        print(f"expression in assign_stmt is : {expression}")
+        return AST.Assignment(cur_token, expression)
 
     def if_stmt(self):
         """
@@ -311,12 +307,12 @@ class Parser:
         """
         if self.current_token[0] == 'NUMBER':
             #write your code here
-            val = self.current_token[1]
+            val = self.current_token
             self.advance()
             return val
         elif self.current_token[0] == 'IDENTIFIER':
             #write your code here
-            val = self.current_token[1]
+            val = self.current_token
             self.advance()
             return val
         elif self.current_token[0] == 'LPAREN':
@@ -324,7 +320,6 @@ class Parser:
             self.advance()
             expr = self.expression()
             self.expect('RPAREN')
-            #self.advance()
             return expr
         # TODO: Check for RPAREN, when it is closed
         else:
