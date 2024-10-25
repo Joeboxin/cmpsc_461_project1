@@ -332,7 +332,7 @@ class Parser:
         myFunction(arg1, arg2)
         TODO: Implement parsing for function calls with arguments.
         """
-        func_name = self.current_token[1]
+        func_name = self.current_token
         self.advance()
         self.expect("LPAREN")
         args = self.arg_list()
