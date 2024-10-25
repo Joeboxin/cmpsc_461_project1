@@ -64,7 +64,7 @@ class Lexer:
                 return self.number()
 
             # TODO: Add logic for operators and punctuation tokens.
-            if self.current_char in "+-*/=!<>():":
+            if self.current_char in "+-*/=!<>(),:":
                 match self.current_char:
 
                     case '+':
@@ -106,6 +106,9 @@ class Lexer:
                     case ')':
                         self.advance()
                         return('RPAREN',')')
+                    case ',':
+                        self.advance()
+                        return('COMMA',',')
                     case ':':
                         self.advance()
                         return('COLON',':')
@@ -205,11 +208,16 @@ class Parser:
             # statements
         TODO: Implement the logic to parse the if condition and blocks of code.
         """
+        print(f"if_stmt_token 1= {self.current_token}")
         self.expect('IF')
+        print(f"if_stmt_token 2= {self.current_token}")
         condition = self.boolean_expression()  # Parse the condition
-        self.expect('COLON') 
+        print(f"if_stmt_token 3= {self.current_token}")
+        self.expect('COLON')
+        print(f"if_stmt_token 4= {self.current_token}")
         block = self.block() 
         else_block = None
+        print(f"should be else: {self.current_token}")
         if self.current_token[0] == 'ELSE':
             self.advance()
             self.expect('COLON')
@@ -245,6 +253,7 @@ class Parser:
         # write your code here
         while self.current_token[0] != 'EOF' and self.current_token != 'DEDENT':
             stmt = self.statement()
+            print(f"block statements are: {stmt}")
             statements.append(stmt)
             self.advance()
         return AST.Block(statements)
@@ -277,7 +286,7 @@ class Parser:
             op = self.current_token
             self.advance()
             right = self.term()
-            left = AST.BinaryOperation(left, op, right)
+            left = AST.BooleanExpression(left, op, right)
         return left
 
     def term(self):
