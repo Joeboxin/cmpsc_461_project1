@@ -208,7 +208,8 @@ class Parser:
         self.expect('IF')
         condition = self.boolean_expression()  # Parse the condition
         self.expect('COLON')
-        block = self.block() 
+        block = self.block()
+
         else_block = None
         if self.current_token[0] == 'ELSE':
             self.expect('ELSE')
@@ -242,11 +243,12 @@ class Parser:
         TODO: Implement logic to capture multiple statements as part of a block.
         """
         statements = []
-        # write your code here
-        while self.current_token[0] != 'EOF':
+        while self.current_token[0] not in ['EOF','ELSE','ELIF']:
             stmt = self.statement()
             statements.append(stmt)
-            self.advance()
+
+            if self.current_token[0] not in ['EOF','ELSE','ELIF']:
+                self.advance()
         return AST.Block(statements)
 
     def expression(self):
