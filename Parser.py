@@ -172,7 +172,7 @@ class Parser:
                 return self.function_call()
             else:
                 raise ValueError(f"Unexpected token after identifier: {self.current_token[0],self.current_token[1]}")
-        elif self.current_token[0] == 'IF' or self.current_token[0] == 'ELSE':
+        elif self.current_token[0] == 'IF':
             return self.if_stmt()
         elif self.current_token[0] == 'WHILE':
             return self.while_stmt()
