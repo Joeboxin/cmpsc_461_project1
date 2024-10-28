@@ -248,7 +248,7 @@ class Parser:
             statements.append(stmt)
 
             if self.current_token[0] not in ['EOF','ELSE','ELIF']:
-                self.advance()
+                break
         return AST.Block(statements)
 
     def expression(self):
