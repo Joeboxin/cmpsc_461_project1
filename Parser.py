@@ -164,6 +164,7 @@ class Parser:
         
         TODO: Dispatch to the correct parsing function based on the current token.
         """
+        print(f"code executes stmt and initializes {self.current_token}")
         if self.current_token[0] == 'IDENTIFIER':
             #TODO: Need to look into how to check if the identifier is apart of an expression or defining
             if self.peek() == 'EQUALS':  # Assignment
@@ -226,6 +227,7 @@ class Parser:
             # statements
         TODO: Implement the logic to parse while loops with a condition and a block of statements.
         """
+        print(f"code executes while stmt and initializes {self.current_token}")
         self.expect('WHILE')
         condition = self.boolean_expression()
         self.expect('COLON')
@@ -242,6 +244,7 @@ class Parser:
             y = 10
         TODO: Implement logic to capture multiple statements as part of a block.
         """
+        print(f"code executes block stmt and initializes {self.current_token}")
         statements = []
         while self.current_token[0] not in ['EOF','ELSE','ELIF']:
             stmt = self.statement()
@@ -258,6 +261,7 @@ class Parser:
         x + y - 5
         TODO: Implement logic to parse binary operations (e.g., addition, subtraction) with correct precedence.
         """
+        print(f"code executes expression and initializes {self.current_token}")
         left = self.term()  # Parse the first term
         while self.current_token[0] in ['PLUS', 'MINUS']:  # Handle + and -
             op = self.current_token  # Capture the operator
@@ -273,6 +277,7 @@ class Parser:
         x == 5
         TODO: Implement parsing for boolean expressions.
         """
+        print(f"code executes boolean_expression and initializes {self.current_token}")
         # write your code here, for reference check expression function
         left = self.term()
         while self.current_token[0] in ['EQ', 'NEQ', 'GREATER', 'LESS']:
@@ -339,7 +344,6 @@ class Parser:
         self.expect("LPAREN")
         args = self.arg_list()
         self.expect("RPAREN")
-        self.advance()
 
         return AST.FunctionCall(func_name, args)
 
