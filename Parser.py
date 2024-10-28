@@ -164,7 +164,6 @@ class Parser:
         
         TODO: Dispatch to the correct parsing function based on the current token.
         """
-        print(f"code executes stmt and initializes {self.current_token}")
         if self.current_token[0] == 'IDENTIFIER':
             #TODO: Need to look into how to check if the identifier is apart of an expression or defining
             if self.peek() == 'EQUALS':  # Assignment
@@ -190,12 +189,10 @@ class Parser:
         x = 5 + 3
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
-        print(f"code executes assign stmt and initializes {self.current_token}")
         cur_token = self.current_token
         self.advance()
         self.expect('EQUALS')
         expression = self.expression()
-        print(f"expression is {expression}")
         return AST.Assignment(cur_token, expression)
 
     def if_stmt(self):
@@ -208,10 +205,8 @@ class Parser:
             # statements
         TODO: Implement the logic to parse the if condition and blocks of code.
         """
-        print(f"code executes if stmt and initializes {self.current_token}")
         self.expect('IF')
         condition = self.boolean_expression() 
-        print(f"condition is {condition}")
         self.expect('COLON')
         block = self.block()
 
@@ -220,7 +215,6 @@ class Parser:
             self.expect('ELSE')
             self.expect('COLON')
             else_block = self.block()
-            print(f"else block is {else_block}")
         return AST.IfStatement(condition, block, else_block)
 
 
@@ -232,7 +226,6 @@ class Parser:
             # statements
         TODO: Implement the logic to parse while loops with a condition and a block of statements.
         """
-        print(f"code executes while stmt and initializes {self.current_token}")
         self.expect('WHILE')
         condition = self.boolean_expression()
         self.expect('COLON')
@@ -249,12 +242,10 @@ class Parser:
             y = 10
         TODO: Implement logic to capture multiple statements as part of a block.
         """
-        print(f"code executes block stmt and initializes {self.current_token}")
         statements = []
         while self.current_token[0] not in ['EOF','ELSE','ELIF']:
             stmt = self.statement()
             statements.append(stmt)
-        print(f"block stmt ends with statements:{statements}")
         return AST.Block(statements)
 
     def expression(self):
@@ -264,7 +255,6 @@ class Parser:
         x + y - 5
         TODO: Implement logic to parse binary operations (e.g., addition, subtraction) with correct precedence.
         """
-        print(f"code executes expression and initializes {self.current_token}")
         left = self.term()  # Parse the first term
         while self.current_token[0] in ['PLUS', 'MINUS']:  # Handle + and -
             op = self.current_token  # Capture the operator
@@ -280,7 +270,6 @@ class Parser:
         x == 5
         TODO: Implement parsing for boolean expressions.
         """
-        print(f"code executes boolean_expression and initializes {self.current_token}")
         # write your code here, for reference check expression function
         left = self.term()
         while self.current_token[0] in ['EQ', 'NEQ', 'GREATER', 'LESS']:
@@ -343,11 +332,9 @@ class Parser:
         TODO: Implement parsing for function calls with arguments.
         """
         func_name = self.current_token
-        print(f"func_name is {func_name}")
         self.advance()
         self.expect("LPAREN")
         args = self.arg_list()
-        print(f"args are {args}")
         self.expect("RPAREN")
 
         return AST.FunctionCall(func_name, args)
