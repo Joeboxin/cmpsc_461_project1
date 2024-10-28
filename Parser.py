@@ -339,6 +339,7 @@ class Parser:
         self.expect("LPAREN")
         args = self.arg_list()
         self.expect("RPAREN")
+        self.advance()
 
         return AST.FunctionCall(func_name, args)
 
