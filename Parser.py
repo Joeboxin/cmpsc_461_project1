@@ -190,10 +190,12 @@ class Parser:
         x = 5 + 3
         TODO: Implement parsing for assignments, where an identifier is followed by '=' and an expression.
         """
+        print(f"code executes assign stmt and initializes {self.current_token}")
         cur_token = self.current_token
         self.advance()
         self.expect('EQUALS')
         expression = self.expression()
+        print(f"expression is {expression}")
         return AST.Assignment(cur_token, expression)
 
     def if_stmt(self):
@@ -206,8 +208,10 @@ class Parser:
             # statements
         TODO: Implement the logic to parse the if condition and blocks of code.
         """
+        print(f"code executes if stmt and initializes {self.current_token}")
         self.expect('IF')
-        condition = self.boolean_expression()  # Parse the condition
+        condition = self.boolean_expression() 
+        print(f"condition is {condition}")
         self.expect('COLON')
         block = self.block()
 
@@ -216,6 +220,7 @@ class Parser:
             self.expect('ELSE')
             self.expect('COLON')
             else_block = self.block()
+            print(f"else block is {else_block}")
         return AST.IfStatement(condition, block, else_block)
 
 
@@ -249,9 +254,7 @@ class Parser:
         while self.current_token[0] not in ['EOF','ELSE','ELIF']:
             stmt = self.statement()
             statements.append(stmt)
-
-            if self.current_token[0] not in ['EOF','ELSE','ELIF']:
-                self.advance()
+        print(f"block stmt ends with statements:{statements}")
         return AST.Block(statements)
 
     def expression(self):
@@ -340,9 +343,11 @@ class Parser:
         TODO: Implement parsing for function calls with arguments.
         """
         func_name = self.current_token
+        print(f"func_name is {func_name}")
         self.advance()
         self.expect("LPAREN")
         args = self.arg_list()
+        print(f"args are {args}")
         self.expect("RPAREN")
 
         return AST.FunctionCall(func_name, args)
