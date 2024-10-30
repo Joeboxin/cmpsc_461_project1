@@ -243,7 +243,7 @@ class Parser:
         TODO: Implement logic to capture multiple statements as part of a block.
         """
         statements = []
-        while self.current_token[0] not in ['EOF','ELSE','ELIF']:
+        while self.current_token[0] not in ['EOF','ELSE']:
             stmt = self.statement()
             statements.append(stmt)
         return AST.Block(statements)
